@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title> From Ebla to Modern Syria: A Digital Timeline of Syrian Civilizations</title>
+  <title>From Ebla to Modern Syria: A Digital Timeline of Syrian Civilizations</title>
   <style>
     :root {
       --papyrus: #fdf6e3;
@@ -15,7 +15,7 @@
     }
 
     body {
-      font-family: 'Georgia', serif;
+      font-family: Georgia, serif;
       background-color: var(--papyrus);
       color: var(--ink);
       margin: 0;
@@ -24,7 +24,7 @@
 
     h1 {
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: 0.5rem;
       font-size: 2rem;
       color: var(--lapis);
       border-bottom: 2px solid var(--sandstone);
@@ -32,9 +32,18 @@
       letter-spacing: 0.03em;
     }
 
+    .intro {
+      max-width: 850px;
+      margin: 0 auto 2rem auto;
+      text-align: center;
+      color: var(--gray);
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
       gap: 1.8rem;
     }
 
@@ -55,9 +64,13 @@
 
     .card img {
       width: 100%;
-      height: auto;
+      height: 170px;
+      object-fit: contain;
+      background-color: #f1ead8;
       display: block;
       border-bottom: 1px solid var(--sandstone);
+      padding: 0.6rem;
+      box-sizing: border-box;
     }
 
     .card-content {
@@ -66,79 +79,103 @@
     }
 
     .card-title {
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: bold;
       margin-bottom: 0.4rem;
       color: var(--hematite);
     }
 
-    .card-description {
+    .meta {
       font-size: 0.8rem;
-      color: var(--gray);
+      color: var(--lapis);
+      margin-bottom: 0.8rem;
       line-height: 1.5;
     }
 
-    a {
-      text-decoration: none;
-      color: inherit;
+    .card-description {
+      font-size: 0.82rem;
+      color: var(--gray);
+      line-height: 1.55;
     }
 
-    a:hover .card-title {
-      color: var(--lapis);
+    .arabic {
+      direction: rtl;
+      text-align: right;
+      font-family: Georgia, "Times New Roman", serif;
+      margin-top: 0.8rem;
+      color: var(--ink);
     }
 
-    a:hover {
-      text-decoration: none;
+    .source {
+      margin-top: 0.8rem;
+      font-size: 0.72rem;
+      color: var(--gray);
+      border-top: 1px solid var(--sandstone);
+      padding-top: 0.5rem;
     }
   </style>
 </head>
+
 <body>
   <h1>From Ebla to Modern Syria: A Digital Timeline of Syrian Civilizations</h1>
+
+  <p class="intro">
+    This pseudo-dynamic virtual timeline presents major kingdoms, civilizations,
+    empires, and historical periods connected to Syria, from the Bronze Age to the modern period.
+    The data is stored in a Google Sheet and displayed through a JSON endpoint.
+  </p>
+
   <div class="gallery" id="gallery"></div>
 
   <script>
-    let objects = [];
-
-    // const endpoint = "https://opensheet.elk.sh/1Y-Ii7uX6AwUKlT3AJB9g6_FJOUDS2hPGODQH3RFMLZU/1";
     const endpoint = "https://opensheet.elk.sh/1h3Xr9eCs3HI6HT0EuIqvUv76gRsaRfOXYvS4L21rBqU/Sheet1";
-  
+
+    const fallbackImage = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Syria_%28orthographic_projection%29.svg/640px-Syria_%28orthographic_projection%29.svg.png";
 
     fetch(endpoint)
       .then(response => response.json())
       .then(data => {
+        const gallery = document.getElementById("gallery");
+
         data.forEach(item => {
-objects.push({
-  title: item.name_ar + " / " + item.name_en,
-  image: item.image_url,
-  description: item.display_period + " · " + item.region + " · " + item.type + "<br><br>" + item.short_description_en + "<br><br>" + item.short_description_ar,
-  link: item.source
-});
-          });
-        });
-        renderGallery();
-      })
-      .catch(error => console.error('Error fetching data:', error));
-    
-    function renderGallery() {
-      const gallery = document.getElementById("gallery");
+          const card = document.createElement("div");
+          card.className = "card";
 
-      objects.forEach(obj => {
-        const card = document.createElement("div");
-        card.className = "card";
+          const image = item.image_url || fallbackImage;
 
-        card.innerHTML = `
-          <a href="${obj.link}" target="_blank">
-            <img src="${obj.image}" alt="${obj.title}">
+          card.innerHTML = `
+            <img src="${image}" alt="${item.name_en}">
             <div class="card-content">
-              <div class="card-title">${obj.title}</div>
-              <div class="card-description">${obj.description}</div>
-            </div>
-          </a>
-        `;
+              <div class="card-title">${item.name_ar} / ${item.name_en}</div>
 
-        gallery.appendChild(card);
+              <div class="meta">
+                <strong>${item.display_period}</strong><br>
+                ${item.region}<br>
+                ${item.capital_or_main_site} · ${item.type}
+              </div>
+
+              <div class="card-description">
+                ${item.short_description_en}
+
+                <div class="arabic">
+                  ${item.short_description_ar}
+                </div>
+
+                <div class="source">
+                  Source: ${item.source}
+                </div>
+              </div>
+            </div>
+          `;
+
+          gallery.appendChild(card);
+        });
+      })
+      .catch(error => {
+        console.error("Error fetching data:", error);
+        document.getElementById("gallery").innerHTML =
+          "<p>Data could not be loaded. Please check the Google Sheet sharing settings or the OpenSheet endpoint.</p>";
       });
-    }
   </script>
 </body>
 </html>
