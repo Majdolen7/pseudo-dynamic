@@ -99,18 +99,20 @@
   <script>
     let objects = [];
 
-    // const endpoint = 'https://api.sheetbest.com/sheets/f90fc378-8e9a-4850-9783-c500e6b6dbdd';
-    const endpoint = "https://opensheet.elk.sh/1Y-Ii7uX6AwUKlT3AJB9g6_FJOUDS2hPGODQH3RFMLZU/1";
+    // const endpoint = "https://opensheet.elk.sh/1Y-Ii7uX6AwUKlT3AJB9g6_FJOUDS2hPGODQH3RFMLZU/1";
+    const endpoint = "https://opensheet.elk.sh/1h3Xr9eCs3HI6HT0EuIqvUv76gRsaRfOXYvS4L21rBqU/Sheet1";
+  
 
     fetch(endpoint)
       .then(response => response.json())
       .then(data => {
         data.forEach(item => {
-          objects.push({
-            title: item.Title,
-            image: item.Image,
-            description: item.Description,
-            link: item.Link
+objects.push({
+  title: item.name_ar + " / " + item.name_en,
+  image: item.image_url,
+  description: item.display_period + " · " + item.region + " · " + item.type + "<br><br>" + item.short_description_en + "<br><br>" + item.short_description_ar,
+  link: item.source
+});
           });
         });
         renderGallery();
